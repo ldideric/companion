@@ -1,0 +1,15 @@
+{
+  "name": "portflow-companion-login",
+  "productName": "Companion Login",
+  "version": "0.1.0",
+  "description": "Logs in to Canvas in its own window and hands the session to Portflow Companion on this computer.",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "electron": "^45.2.2"
+  }
+}
