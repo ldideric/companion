@@ -19,6 +19,10 @@ const STRINGS = {
     offline: 'Companion is niet bereikbaar op poort {port}. Draait de app?',
     refused: 'Companion accepteerde de sessie niet: {detail}',
     timeout: 'Het inloggen duurde te lang. Probeer het opnieuw.',
+    tls: 'Companion kon geen beveiligde verbinding maken met {host}. Iets op deze computer onderschept die verbindingen, meestal een virusscanner, adblocker of proxy die HTTPS controleert. Zet Canvas en Portflow daarin bij de uitzonderingen, of laat Docker rechtstreeks verbinden.',
+    network: 'Companion kan {host} niet bereiken. Controleer je internetverbinding en probeer het opnieuw.',
+    loadFailed: 'De pagina van {host} laadde niet ({error}). Controleer je internetverbinding.',
+    retry: 'Opnieuw proberen',
   },
   en: {
     confirm: 'Log in to Canvas for Companion?',
@@ -30,6 +34,10 @@ const STRINGS = {
     offline: 'Companion is not reachable on port {port}. Is the app running?',
     refused: 'Companion did not accept the session: {detail}',
     timeout: 'Logging in took too long. Try again.',
+    tls: 'Companion could not make a secure connection to {host}. Something on this computer intercepts those connections: usually a virus scanner, ad blocker or proxy that inspects HTTPS. Add Canvas and Portflow to its exceptions, or let Docker connect directly.',
+    network: "Companion can't reach {host}. Check your internet connection and try again.",
+    loadFailed: 'The page from {host} did not load ({error}). Check your internet connection.',
+    retry: 'Try again',
   },
 }
 let s = STRINGS.en
@@ -115,6 +123,26 @@ async function run() {
     handOver(ses, port, fromLink).catch((e) => fail(e.message))
   })
 
+  // Electron has no error page of its own: a page that fails to load leaves a blank window. Say what happened.
+  win.webContents.on('did-fail-load', async (_e, code, error, url, isMainFrame) => {
+    if (!isMainFrame || code === -3 || handing) return // -3: aborted by a redirect or a new navigation
+    let host = 'Canvas'
+    try {
+      host = new URL(url).hostname
+    } catch {}
+    debug('load failed', host, error)
+    if (win && !win.isDestroyed()) win.hide()
+    const { response } = await dialog.showMessageBox({
+      type: 'error',
+      buttons: [t('retry'), t('cancel')],
+      defaultId: 0,
+      cancelId: 1,
+      message: t('loadFailed', { host, error }),
+    })
+    if (response === 0) win.loadURL(lib.LAUNCH_URL)
+    else app.quit()
+  })
+
   win.loadURL(lib.LAUNCH_URL)
 }
 
@@ -137,7 +165,12 @@ async function handOver(ses, port, fromLink) {
     return fail(t('offline', { port }))
   }
   const body = await res.json().catch(() => ({}))
-  if (!res.ok) return fail(t('refused', { detail: body.detail ?? res.status }))
+  if (!res.ok) {
+    // Companion says why when Canvas or Portflow was out of reach: that is not a problem with the login.
+    const d = body.detail
+    if (d && (d.reason === 'tls' || d.reason === 'network')) return fail(t(d.reason, { host: d.host || 'Canvas' }))
+    return fail(t('refused', { detail: typeof d === 'string' ? d : res.status }))
+  }
 
   // From a link, Companion's page is waiting and starts the fetch itself; started by hand, the helper does it.
   if (!fromLink) await fetch(`${base}/api/fetch`, { method: 'POST' }).catch(() => {}) // already running is fine
