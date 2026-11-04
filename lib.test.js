@@ -1,6 +1,6 @@
 const test = require('node:test')
 const assert = require('node:assert')
-const { parseArgs, cookieHeader, reachedPortflow, needsStudent } = require('./lib')
+const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent } = require('./lib')
 
 test('parseArgs defaults to port 8000, started by the student', () => {
   assert.deepStrictEqual(parseArgs(['/usr/bin/electron', '.']), { port: 8000, fromLink: false })
@@ -32,4 +32,19 @@ test('needsStudent shows the window for login pages only', () => {
   assert.ok(needsStudent('https://login.microsoftonline.com/common/oauth2'))
   assert.ok(!needsStudent('https://canvas.hu.nl/accounts/1/external_tools/1134'))
   assert.ok(!needsStudent('https://portfolio.drieam.app/'))
+})
+
+test('keepDetails gives session cookies an expiry date and leaves the rest alone', () => {
+  const cookies = [
+    { name: 'canvas_session', value: 'a', domain: 'canvas.hu.nl', hostOnly: true, path: '/', secure: true, httpOnly: true, sameSite: 'no_restriction', session: true },
+    { name: 'log_session_id', value: 'b', domain: '.canvas.hu.nl', hostOnly: false, path: '/', secure: true, httpOnly: false, sameSite: 'unspecified', session: true },
+    { name: 'already_kept', value: 'c', domain: 'canvas.hu.nl', hostOnly: true, path: '/', session: false, expirationDate: 1 },
+  ]
+  const kept = keepDetails(cookies, 1000)
+  assert.strictEqual(kept.length, 2)
+  assert.deepStrictEqual(kept[0], {
+    url: 'https://canvas.hu.nl/', name: 'canvas_session', value: 'a', path: '/', secure: true, httpOnly: true,
+    sameSite: 'no_restriction', expirationDate: 1000 + 30 * 24 * 3600,
+  })
+  assert.strictEqual(kept[1].domain, '.canvas.hu.nl') // a domain cookie stays a domain cookie
 })

@@ -113,6 +113,10 @@ async function run() {
 
 async function handOver(ses, port) {
   const cookies = await ses.cookies.get({ url: `${lib.CANVAS}/` })
+  // Keep the Canvas session for the next run, so it can skip the SURFconext and Microsoft pages.
+  const now = Math.floor(Date.now() / 1000)
+  for (const details of lib.keepDetails(cookies, now)) await ses.cookies.set(details).catch((e) => debug('could not keep', details.name, e.message))
+  await ses.cookies.flushStore()
   // The main process posts without an Origin header, which Companion's guard allows for local tools.
   const base = `http://127.0.0.1:${port}`
   let res

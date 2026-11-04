@@ -40,6 +40,28 @@ function cookieHeader(cookies) {
   return cookies.map((c) => `${c.name}=${c.value}`).join('; ')
 }
 
+const KEEP_DAYS = 30 // an upper bound only: Canvas decides how long a session really lives
+
+/**
+ * Canvas sets its cookies without an expiry date, so Electron drops them when the helper quits and the next run
+ * starts at the SURFconext login again. These are the same cookies with an expiry date, as cookies.set details.
+ */
+function keepDetails(cookies, nowSeconds) {
+  return cookies
+    .filter((c) => c.session)
+    .map((c) => ({
+      url: `${CANVAS}${c.path || '/'}`,
+      name: c.name,
+      value: c.value,
+      ...(c.hostOnly ? {} : { domain: c.domain }),
+      path: c.path,
+      secure: c.secure,
+      httpOnly: c.httpOnly,
+      sameSite: c.sameSite,
+      expirationDate: nowSeconds + KEEP_DAYS * 24 * 3600,
+    }))
+}
+
 /** The launch is done once any frame reaches Portflow: Canvas only sends you there when you are logged in. */
 function reachedPortflow(url) {
   try {
@@ -62,4 +84,4 @@ function needsStudent(url) {
   }
 }
 
-module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, reachedPortflow, needsStudent }
+module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent }
