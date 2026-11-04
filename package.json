@@ -7,9 +7,22 @@
   "private": true,
   "scripts": {
     "start": "electron .",
-    "test": "node --test"
+    "test": "node --test",
+    "dist:win": "electron-builder --win nsis portable --x64"
   },
+  "author": "Lietze Diderich",
   "devDependencies": {
-    "electron": "^45.2.2"
+    "electron": "^45.2.2",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "nl.lietze.companion-login",
+    "productName": "Companion Login",
+    "files": ["main.js", "lib.js", "package.json"],
+    "directories": { "output": "dist" },
+    "protocols": [{ "name": "Companion Login", "schemes": ["portflow-companion"] }],
+    "win": { "signAndEditExecutable": false },
+    "nsis": { "oneClick": true, "perMachine": false, "artifactName": "Companion-Login-Setup-${version}.exe" },
+    "portable": { "artifactName": "Companion-Login-${version}-portable.exe" }
   }
 }

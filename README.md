@@ -19,4 +19,28 @@ npm test                       # the parts that don't need Electron
 
 `COMPANION_LOGIN_DEBUG=1` prints each page the window visits (origin and path only). Electron runs as plain Node when `ELECTRON_RUN_AS_NODE` is set, which VS Code's extension host does; unset it there.
 
-The window's login lives in the app's user data dir (`~/.config/Companion Login` on Linux, named after `productName`). Delete it to log out.
+The window's login lives in the app's user data dir (`~/.config/Companion Login` on Linux, `%APPDATA%\Companion Login` on Windows, named after `productName`). Delete it to log out.
+
+## Windows build
+
+Two files in `dist/`, both x64 and unsigned:
+
+- `Companion-Login-Setup-<version>.exe`: installs for the current user only (no admin), adds a Start menu entry and registers `portflow-companion://` links.
+- `Companion-Login-<version>-portable.exe`: runs without installing. It registers the link itself on every start, pointing at the file you started.
+
+The installer step needs Wine. Without Wine on the machine, build in electron-builder's Wine image (after `npm install`):
+
+```sh
+docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp/home -v "$PWD":/project -w /project \
+  electronuserland/builder:wine npx electron-builder --win nsis portable --x64
+```
+
+With Wine installed, `npm run dist:win` does the same.
+
+## Installing on Windows
+
+1. Run `Companion-Login-Setup-<version>.exe`. The app isn't signed, so Windows SmartScreen says "Windows protected your PC". Click "More info", then "Run anyway". This happens once per downloaded file.
+2. The installer finishes on its own and starts Companion Login. With Companion running on port 8000, it opens the Canvas login, or closes by itself when Canvas still knows you.
+3. Later, start it from the Start menu, or from a `portflow-companion://login?port=8000` link (it asks before it logs in).
+
+Uninstall it from Settings, Apps. That leaves the login in `%APPDATA%\Companion Login`; delete that folder too to log out.

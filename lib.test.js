@@ -1,6 +1,6 @@
 const test = require('node:test')
 const assert = require('node:assert')
-const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent } = require('./lib')
+const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget } = require('./lib')
 
 test('parseArgs defaults to port 8000, started by the student', () => {
   assert.deepStrictEqual(parseArgs(['/usr/bin/electron', '.']), { port: 8000, fromLink: false })
@@ -47,4 +47,19 @@ test('keepDetails gives session cookies an expiry date and leaves the rest alone
     sameSite: 'no_restriction', expirationDate: 1000 + 30 * 24 * 3600,
   })
   assert.strictEqual(kept[1].domain, '.canvas.hu.nl') // a domain cookie stays a domain cookie
+})
+
+test('parseArgs reads a link the way Windows passes it', () => {
+  const argv = ['C:\\Users\\s\\AppData\\Local\\Programs\\Companion Login\\Companion Login.exe', '--allow-file-access-from-files', 'portflow-companion://login/?port=8080']
+  assert.deepStrictEqual(parseArgs(argv), { port: 8080, fromLink: true })
+})
+
+test('protocolTarget registers the portable exe, the installed exe, or electron with this folder', () => {
+  const portable = { env: { PORTABLE_EXECUTABLE_FILE: 'D:\\Companion-Login.exe' }, execPath: 'C:\\Temp\\x.exe', defaultApp: false, argv: [] }
+  assert.deepStrictEqual(protocolTarget(portable), ['D:\\Companion-Login.exe', []])
+  const installed = { env: {}, execPath: 'C:\\App\\Companion Login.exe', defaultApp: false, argv: ['C:\\App\\Companion Login.exe'] }
+  assert.deepStrictEqual(protocolTarget(installed), ['C:\\App\\Companion Login.exe', []])
+  const [exe, args] = protocolTarget({ env: {}, execPath: '/usr/bin/electron', defaultApp: true, argv: ['/usr/bin/electron', '.'] })
+  assert.strictEqual(exe, '/usr/bin/electron')
+  assert.strictEqual(args.length, 1)
 })
