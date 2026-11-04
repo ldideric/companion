@@ -17,6 +17,7 @@ const STRINGS = {
     title: 'Inloggen bij Canvas voor Companion',
     done: 'Ingelogd als {name}. Companion haalt je portfolio op.',
     offline: 'Companion is niet bereikbaar op poort {port}. Draait de app?',
+    notCompanion: 'Op poort {port} draait iets anders dan Companion. Je sessie is niet verstuurd.',
     refused: 'Companion accepteerde de sessie niet: {detail}',
     timeout: 'Het inloggen duurde te lang. Probeer het opnieuw.',
     tls: 'Companion kon geen beveiligde verbinding maken met {host}. Iets op deze computer onderschept die verbindingen, meestal een virusscanner, adblocker of proxy die HTTPS controleert. Zet Canvas en Portflow daarin bij de uitzonderingen, of laat Docker rechtstreeks verbinden.',
@@ -32,6 +33,7 @@ const STRINGS = {
     title: 'Log in to Canvas for Companion',
     done: 'Logged in as {name}. Companion is fetching your portfolio.',
     offline: 'Companion is not reachable on port {port}. Is the app running?',
+    notCompanion: 'Something other than Companion is running on port {port}. Your session was not sent.',
     refused: 'Companion did not accept the session: {detail}',
     timeout: 'Logging in took too long. Try again.',
     tls: 'Companion could not make a secure connection to {host}. Something on this computer intercepts those connections: usually a virus scanner, ad blocker or proxy that inspects HTTPS. Add Canvas and Portflow to its exceptions, or let Docker connect directly.',
@@ -155,6 +157,13 @@ async function handOver(ses, port, fromLink) {
   // The main process posts without an Origin header, which Companion's guard allows for local tools.
   const base = `http://127.0.0.1:${port}`
   let res
+  // A link chooses the port, so first make sure Companion is the one listening there.
+  try {
+    const version = await fetch(`${base}/api/version`)
+    if (!lib.isCompanion(await version.json().catch(() => null))) return fail(t('notCompanion', { port }))
+  } catch {
+    return fail(t('offline', { port }))
+  }
   try {
     res = await fetch(`${base}/api/session`, {
       method: 'POST',

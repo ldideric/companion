@@ -1,6 +1,13 @@
 const test = require('node:test')
 const assert = require('node:assert')
-const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget } = require('./lib')
+const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion } = require('./lib')
+
+test('isCompanion only accepts the answer Companion gives on /api/version', () => {
+  assert.strictEqual(isCompanion({ current: '0.7.0', latest: null, check: true, reachable: true, update: false, feedback: true, demo: null }), true)
+  assert.strictEqual(isCompanion({ ok: true }), false)
+  assert.strictEqual(isCompanion(null), false)
+  assert.strictEqual(isCompanion('<html>'), false)
+})
 
 test('parseArgs defaults to port 8000, started by the student', () => {
   assert.deepStrictEqual(parseArgs(['/usr/bin/electron', '.']), { port: 8000, fromLink: false })

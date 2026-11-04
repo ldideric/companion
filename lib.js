@@ -91,4 +91,12 @@ function protocolTarget({ env, execPath, defaultApp, argv }) {
   return [execPath, []]
 }
 
-module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget }
+/**
+ * Whether /api/version answered the way Companion does. A link can name any port, so the helper checks this before
+ * the Canvas session goes there: another program on that port must never receive it.
+ */
+function isCompanion(body) {
+  return !!body && typeof body === 'object' && typeof body.current === 'string' && 'check' in body && 'feedback' in body
+}
+
+module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion }
