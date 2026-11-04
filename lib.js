@@ -62,4 +62,11 @@ function needsStudent(url) {
   }
 }
 
-module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, reachedPortflow, needsStudent }
+/** What a portflow-companion:// link should start: the portable exe's real file, the installed exe, or electron with this folder. */
+function protocolTarget({ env, execPath, defaultApp, argv }) {
+  if (env.PORTABLE_EXECUTABLE_FILE) return [env.PORTABLE_EXECUTABLE_FILE, []]
+  if (defaultApp) return [execPath, [require('node:path').resolve(argv[1])]]
+  return [execPath, []]
+}
+
+module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, reachedPortflow, needsStudent, protocolTarget }

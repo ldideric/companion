@@ -38,6 +38,13 @@ const t = (key, vars = {}) => s[key].replace(/\{(\w+)\}/g, (_, k) => String(vars
 let win = null
 const debug = process.env.COMPANION_LOGIN_DEBUG ? (...a) => console.log('[login]', ...a) : () => {}
 
+// Windows: portflow-companion:// links open this app. The installer registers the link as well; the portable exe
+// runs from a temporary copy, so it registers the file the student actually started.
+if (process.platform === 'win32') {
+  const [exe, args] = lib.protocolTarget(process)
+  app.setAsDefaultProtocolClient(lib.SCHEME, exe, args)
+}
+
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
