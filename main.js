@@ -105,13 +105,13 @@ async function run() {
     clearTimeout(showTimer)
     clearTimeout(loginTimer)
     clearTimeout(giveUp)
-    handOver(ses, port).catch((e) => fail(e.message))
+    handOver(ses, port, fromLink).catch((e) => fail(e.message))
   })
 
   win.loadURL(lib.LAUNCH_URL)
 }
 
-async function handOver(ses, port) {
+async function handOver(ses, port, fromLink) {
   const cookies = await ses.cookies.get({ url: `${lib.CANVAS}/` })
   // Keep the Canvas session for the next run, so it can skip the SURFconext and Microsoft pages.
   const now = Math.floor(Date.now() / 1000)
@@ -123,7 +123,7 @@ async function handOver(ses, port) {
   try {
     res = await fetch(`${base}/api/session`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Companion-Login': app.getVersion() }, // so Companion offers the helper next time
       body: JSON.stringify({ cookies: lib.cookieHeader(cookies) }),
     })
   } catch {
@@ -132,7 +132,8 @@ async function handOver(ses, port) {
   const body = await res.json().catch(() => ({}))
   if (!res.ok) return fail(t('refused', { detail: body.detail ?? res.status }))
 
-  await fetch(`${base}/api/fetch`, { method: 'POST' }).catch(() => {}) // already running is fine
+  // From a link, Companion's page is waiting and starts the fetch itself; started by hand, the helper does it.
+  if (!fromLink) await fetch(`${base}/api/fetch`, { method: 'POST' }).catch(() => {}) // already running is fine
   if (win && !win.isDestroyed()) win.hide()
   if (Notification.isSupported()) new Notification({ title: 'Companion', body: t('done', { name: body.user?.name ?? '' }) }).show()
   setTimeout(() => app.quit(), 1500)
