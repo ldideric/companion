@@ -37,6 +37,8 @@ docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp/home -v "$PWD":/project 
 
 With Wine installed, `npm run dist:win` does the same.
 
+Linux (Fedora, rpm): the same image, `npx electron-builder --linux rpm` instead. `npm run dist:linux` works too where the bundled packaging tool runs (on Fedora it needs `libxcrypt-compat`). Install with `sudo dnf install ./dist/companion-login-<version>.x86_64.rpm`; the package's desktop entry registers the `portflow-companion://` link.
+
 ## Installing on Windows
 
 1. Run `Companion-Login-Setup-<version>.exe`. The app isn't signed, so Windows SmartScreen says "Windows protected your PC". Click "More info", then "Run anyway". This happens once per downloaded file.
