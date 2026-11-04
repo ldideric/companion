@@ -19,4 +19,4 @@ npm test                       # the parts that don't need Electron
 
 `COMPANION_LOGIN_DEBUG=1` prints each page the window visits (origin and path only). Electron runs as plain Node when `ELECTRON_RUN_AS_NODE` is set, which VS Code's extension host does; unset it there.
 
-The window's login lives in Electron's user data dir (`~/.config/portflow-companion-login` on Linux). Delete it to log out.
+The window's login lives in the app's user data dir (`~/.config/Companion Login` on Linux, named after `productName`). Delete it to log out.
