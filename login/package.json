@@ -1,7 +1,7 @@
 {
   "name": "portflow-companion-login",
   "productName": "Companion Login",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Logs in to Canvas in its own window and hands the session to Portflow Companion on this computer.",
   "main": "main.js",
   "private": true,
@@ -9,7 +9,7 @@
     "start": "electron .",
     "test": "node --test",
     "dist:win": "electron-builder --win nsis portable --x64",
-    "dist:linux": "electron-builder --linux rpm"
+    "dist:linux": "electron-builder --linux rpm deb AppImage"
   },
   "author": "Lietze Diderich",
   "devDependencies": {
@@ -22,6 +22,7 @@
     "files": [
       "main.js",
       "lib.js",
+      "updater.js",
       "package.json"
     ],
     "directories": {
@@ -41,14 +42,16 @@
     "nsis": {
       "oneClick": true,
       "perMachine": false,
-      "artifactName": "Companion-Login-Setup-${version}.exe"
+      "artifactName": "Companion-Login-Setup.exe"
     },
     "portable": {
-      "artifactName": "Companion-Login-${version}-portable.exe"
+      "artifactName": "Companion-Login-portable.exe"
     },
     "linux": {
       "target": [
-        "rpm"
+        "rpm",
+        "deb",
+        "AppImage"
       ],
       "category": "Network",
       "executableName": "companion-login",
@@ -56,9 +59,24 @@
       "syncDesktopName": true
     },
     "rpm": {
-      "artifactName": "companion-login-${version}.${arch}.rpm"
+      "artifactName": "companion-login.${arch}.rpm"
+    },
+    "publish": [
+      {
+        "provider": "generic",
+        "url": "https://github.com/ldideric/companion/releases/download/login-latest"
+      }
+    ],
+    "deb": {
+      "artifactName": "companion-login_${arch}.deb"
+    },
+    "appImage": {
+      "artifactName": "Companion-Login-${arch}.AppImage"
     }
   },
   "homepage": "https://github.com/ldideric/portflow-companion",
-  "desktopName": "companion-login.desktop"
+  "desktopName": "companion-login.desktop",
+  "dependencies": {
+    "electron-updater": "^6.8.11"
+  }
 }

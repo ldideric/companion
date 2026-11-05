@@ -3,6 +3,7 @@
 
 const { app, BrowserWindow, Notification, dialog, session } = require('electron')
 const lib = require('./lib')
+const updater = require('./updater')
 
 const GIVE_UP_MS = 20 * 60 * 1000
 const SHOW_AFTER_MS = 8000 // show the window anyway when nothing happens for this long
@@ -70,6 +71,7 @@ if (!app.requestSingleInstanceLock()) {
 
 async function run() {
   s = app.getLocale().startsWith('nl') ? STRINGS.nl : STRINGS.en
+  updater.start(debug)
   const { port, fromLink } = lib.parseArgs(process.argv)
 
   // Any web page can open a portflow-companion:// link, so a link never logs in without the student saying so.
@@ -185,11 +187,17 @@ async function handOver(ses, port, fromLink) {
   if (!fromLink) await fetch(`${base}/api/fetch`, { method: 'POST' }).catch(() => {}) // already running is fine
   if (win && !win.isDestroyed()) win.hide()
   if (Notification.isSupported()) new Notification({ title: 'Companion', body: t('done', { name: body.user?.name ?? '' }) }).show()
-  setTimeout(() => app.quit(), 1500)
+  setTimeout(quit, 1500)
 }
 
 async function fail(message) {
   if (win && !win.isDestroyed()) win.hide()
   await dialog.showMessageBox({ type: 'error', message })
+  quit()
+}
+
+// An update that is still downloading gets a short while to finish, so it installs on this quit.
+async function quit() {
+  await updater.settle()
   app.quit()
 }

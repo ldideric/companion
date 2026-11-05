@@ -99,4 +99,11 @@ function isCompanion(body) {
   return !!body && typeof body === 'object' && typeof body.current === 'string' && 'check' in body && 'feedback' in body
 }
 
-module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion }
+// Only the Windows installer and the AppImage update themselves (see updater.js).
+function updatesItself(env = process.env, platform = process.platform) {
+  if (platform === 'win32') return !env.PORTABLE_EXECUTABLE_FILE
+  if (platform === 'linux') return Boolean(env.APPIMAGE)
+  return false
+}
+
+module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion, updatesItself }

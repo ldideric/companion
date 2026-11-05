@@ -1,6 +1,6 @@
 const test = require('node:test')
 const assert = require('node:assert')
-const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion } = require('./lib')
+const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion, updatesItself } = require('./lib')
 
 test('isCompanion only accepts the answer Companion gives on /api/version', () => {
   assert.strictEqual(isCompanion({ current: '0.7.0', latest: null, check: true, reachable: true, update: false, feedback: true, demo: null }), true)
@@ -69,4 +69,12 @@ test('protocolTarget registers the portable exe, the installed exe, or electron 
   const [exe, args] = protocolTarget({ env: {}, execPath: '/usr/bin/electron', defaultApp: true, argv: ['/usr/bin/electron', '.'] })
   assert.strictEqual(exe, '/usr/bin/electron')
   assert.strictEqual(args.length, 1)
+})
+
+test('updatesItself: the Windows installer and the AppImage, not the portable exe, rpm, deb or macOS', () => {
+  assert.ok(updatesItself({}, 'win32'))
+  assert.ok(!updatesItself({ PORTABLE_EXECUTABLE_FILE: 'D:\\Companion-Login.exe' }, 'win32'))
+  assert.ok(updatesItself({ APPIMAGE: '/home/s/Companion-Login.AppImage' }, 'linux'))
+  assert.ok(!updatesItself({}, 'linux'))
+  assert.ok(!updatesItself({}, 'darwin'))
 })

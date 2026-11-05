@@ -1,0 +1,76 @@
+name: Companion Login
+
+# Push a tag like login-v0.2.0 (matching the version in login/package.json) to build the installers, attach them
+# to a release of that tag, and copy them to the fixed login-latest release. The helper updates itself from
+# login-latest, and download links point there, so they never change between versions.
+on:
+  push:
+    tags: ['login-v*.*.*']
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # Builds the rpm without libxcrypt-compat and the Windows installer with Wine.
+    container: electronuserland/builder:wine
+    defaults:
+      run:
+        working-directory: login
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Tag matches login/package.json
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "login-v$version" != "$GITHUB_REF_NAME" ]; then
+            echo "Tag $GITHUB_REF_NAME does not match login/package.json version $version" >&2
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm test
+      - run: npx electron-builder --publish never --linux rpm deb AppImage --x64
+      - run: npx electron-builder --publish never --win nsis portable --x64
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: login
+          if-no-files-found: error
+          path: |
+            login/dist/*.exe
+            login/dist/*.blockmap
+            login/dist/*.AppImage
+            login/dist/*.rpm
+            login/dist/*.deb
+            login/dist/latest*.yml
+            !login/dist/*__uninstaller*
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/download-artifact@v8
+        with:
+          name: login
+          path: files
+
+      - name: Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#login-v}"
+          # The changes to login/ since the previous helper release, one line per commit.
+          previous=$(git tag --list 'login-v*' --sort=-v:refname | grep -vx "$GITHUB_REF_NAME" | head -1)
+          git log --format='- %s' ${previous:+$previous..}"$GITHUB_REF_NAME" -- login > notes.md
+          gh release create "$GITHUB_REF_NAME" files/* --title "Companion Login $version" --notes-file notes.md --verify-tag --latest=false
+
+          if ! gh release view login-latest > /dev/null 2>&1; then
+            gh release create login-latest --target main --title "Companion Login" --notes "Updated with each release." --latest=false
+          fi
+          gh release upload login-latest files/* --clobber
+          gh release edit login-latest --notes "Companion Login $version. The download links here always point at the newest version."

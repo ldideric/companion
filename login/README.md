@@ -21,27 +21,29 @@ npm test                       # the parts that don't need Electron
 
 The window's login lives in the app's user data dir (`~/.config/Companion Login` on Linux, `%APPDATA%\Companion Login` on Windows, named after `productName`). Delete it to log out.
 
-## Windows build
+## Releases
 
-Two files in `dist/`, both x64 and unsigned:
+Bump `version` in `package.json`, commit, and push a tag `login-v<version>`. The workflow in `.github/workflows/login.yml` builds the Windows installer and portable exe and the Linux rpm, deb and AppImage, attaches them to the release of that tag, and copies them to the fixed `login-latest` release. File names carry no version, so links to `login-latest` keep working.
 
-- `Companion-Login-Setup-<version>.exe`: installs for the current user only (no admin), adds a Start menu entry and registers `portflow-companion://` links.
-- `Companion-Login-<version>-portable.exe`: runs without installing. It registers the link itself on every start, pointing at the file you started.
+The Windows installer and the AppImage update themselves from `login-latest` (`updater.js`): a new version downloads in the background and installs when the helper quits. The portable exe, rpm and deb update by downloading again.
 
-The installer step needs Wine. Without Wine on the machine, build in electron-builder's Wine image (after `npm install`):
+## Building locally
+
+Same as CI, in electron-builder's Wine image (after `npm install`):
 
 ```sh
 docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp/home -v "$PWD":/project -w /project \
-  electronuserland/builder:wine npx electron-builder --win nsis portable --x64
+  electronuserland/builder:wine sh -c 'npx electron-builder --publish never --linux rpm deb AppImage --x64 && npx electron-builder --publish never --win nsis portable --x64'
 ```
 
-With Wine installed, `npm run dist:win` does the same.
-
-Linux (Fedora, rpm): the same image, `npx electron-builder --linux rpm` instead. `npm run dist:linux` works too where the bundled packaging tool runs (on Fedora it needs `libxcrypt-compat`). Install with `sudo dnf install ./dist/companion-login-<version>.x86_64.rpm`; the package's desktop entry registers the `portflow-companion://` link.
+- `Companion-Login-Setup.exe`: installs for the current user only (no admin), adds a Start menu entry and registers `portflow-companion://` links.
+- `Companion-Login-portable.exe`: runs without installing. It registers the link itself on every start, pointing at the file you started.
+- `companion-login.x86_64.rpm`, `companion-login_amd64.deb`: the package's desktop entry registers the link. On Fedora, `npm run dist:linux` outside Docker needs `libxcrypt-compat`.
+- `Companion-Login-x86_64.AppImage`: runs without installing.
 
 ## Installing on Windows
 
-1. Run `Companion-Login-Setup-<version>.exe`. The app isn't signed, so Windows SmartScreen says "Windows protected your PC". Click "More info", then "Run anyway". This happens once per downloaded file.
+1. Run `Companion-Login-Setup.exe`. The app isn't signed, so Windows SmartScreen says "Windows protected your PC". Click "More info", then "Run anyway". This happens once per downloaded file.
 2. The installer finishes on its own and starts Companion Login. With Companion running on port 8000, it opens the Canvas login, or closes by itself when Canvas still knows you.
 3. Later, start it from the Start menu, or from a `portflow-companion://login?port=8000` link (it asks before it logs in).
 
