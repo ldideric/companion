@@ -33,6 +33,8 @@ jobs:
       - run: npm test
       - run: npx electron-builder --publish never --linux rpm deb AppImage --x64
       - run: npx electron-builder --publish never --win nsis portable --x64
+        env:
+          HOME: /tmp/home # Wine refuses the container's home, which belongs to another user
 
       - uses: actions/upload-artifact@v7
         with:
