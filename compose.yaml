@@ -1,0 +1,21 @@
+# Portflow Companion with docker compose: the same app as the one-command install, with your data in two
+# folders next to this file instead of a Docker volume.
+#
+# Put this file in an empty folder, then run there:
+#   mkdir -p cache .secrets
+#   docker compose up -d
+# and open http://localhost:8000.
+#
+# Update: docker compose pull, then docker compose up -d. Your data stays in cache/ and .secrets/.
+name: portflow-companion
+
+services:
+  portflow-companion:
+    image: ghcr.io/ldideric/portflow-companion:latest
+    # Only reachable from this computer: the app holds your Canvas session.
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ./cache:/data/cache:z      # your portfolio, plan and drafts
+      - ./.secrets:/data/secrets:z  # your Canvas cookies
+    restart: unless-stopped

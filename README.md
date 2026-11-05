@@ -1,48 +1,40 @@
-# Companion Login
+# Portflow Companion
 
-A small desktop app that logs in to Canvas in its own window and hands the session to Portflow Companion on this computer, so nobody has to copy cookies from the developer tools.
+Voor HU Open-ICT-studenten die Portflow gebruiken. Portflow toont je evaluaties en bewijsstukken los van elkaar. Wat je er niet makkelijk in ziet: waar je staat over het hele semester, wat je deze week moet doen, en of een evaluatie klaar is om in te dienen. Companion haalt je portfolio op naar je eigen computer en laat dat wel zien.
 
-1. It opens the Canvas launch of Portflow in a window that keeps its own login between runs.
-2. If Canvas still knows you, the launch reaches Portflow and the window never shows. Otherwise it shows the login (SURFconext, then Microsoft) and you log in as usual.
-3. Once Portflow is reached, it posts the Canvas cookies to `http://127.0.0.1:<port>/api/session`, starts a fetch and closes.
+Companion is een project van een student. Het is niet verbonden aan, goedgekeurd door of gelieerd met Hogeschool Utrecht of Drieam.
 
-The session only goes to Companion on this computer. Started from a `portflow-companion://login?port=8000` link, it asks first, since any web page can open such a link.
+## Wat je ermee kunt
 
-## Run
+- **Zien waar je staat.** Hoeveel weken je nog hebt, hoeveel evaluaties je hebt ingediend, welk niveau de coach per vaardigheid gaf en wat er nog moet.
+- **Plannen.** Welke evaluatie je in welke week schrijft. Companion stelt een planning voor en past hem aan als je achterloopt. Elke week maak je er een afbeelding van, als bewijs voor Plannen (PL).
+- **Weten wat je nu moet doen.** Taken die naar echte dingen wijzen: deze evaluatie is te laat, dit bewijsstuk heeft nog geen feedback, deze persoon heeft je feedbackverzoek nog niet beantwoord.
+- **Je evaluatie schrijven.** Met de LEF-criteria, wat de coach de vorige keer zei en de feedback op je bewijs ernaast. Tag bewijs met `@` en plak de tekst daarna in Portflow, tags inbegrepen.
+- **Fouten voorkomen.** Elke evaluatie moet minstens één bewijsstuk taggen met feedback van iemand anders. Companion laat zien welk bewijs dat heeft, en waarschuwt als het ontbreekt.
+- **Bijhouden wat er veranderd is.** Een beoordeling, een teruggestuurde evaluatie of nieuwe feedback sinds je laatste bezoek.
 
-```sh
-npm install
-npm start                      # Companion on port 8000
-npm start -- --port=8080       # another port
-npm test                       # the parts that don't need Electron
-```
+## Je gegevens
 
-`COMPANION_LOGIN_DEBUG=1` prints each page the window visits (origin and path only). Electron runs as plain Node when `ELECTRON_RUN_AS_NODE` is set, which VS Code's extension host does; unset it there.
+- Alles staat op je eigen computer. Companion leest uit Portflow en verandert daar niets, met één uitzondering: de naamhulp past namen van bewijsstukken aan, maar alleen als jij de lijst hebt gecontroleerd en bevestigd. Daarbij wordt nooit iets verwijderd.
+- Je Canvas-cookies blijven op je computer en gaan nergens anders heen.
+- Alleen wat je zelf meldt via **Idee of probleem** gaat naar de maker. Je ziet eerst precies wat er verstuurd wordt. Onder **Privacy** in dat formulier staat waar je bericht terechtkomt, hoe lang het blijft en hoe je het laat verwijderen.
 
-The window's login lives in the app's user data dir (`~/.config/Companion Login` on Linux, `%APPDATA%\Companion Login` on Windows, named after `productName`). Delete it to log out.
+## Installeren
 
-## Windows build
-
-Two files in `dist/`, both x64 and unsigned:
-
-- `Companion-Login-Setup-<version>.exe`: installs for the current user only (no admin), adds a Start menu entry and registers `portflow-companion://` links.
-- `Companion-Login-<version>-portable.exe`: runs without installing. It registers the link itself on every start, pointing at the file you started.
-
-The installer step needs Wine. Without Wine on the machine, build in electron-builder's Wine image (after `npm install`):
+Je hebt [Docker Desktop](https://www.docker.com/products/docker-desktop/) nodig (Windows, macOS) of Docker (Linux). Plak daarna dit in een terminal (Windows: PowerShell) en ga naar <http://localhost:8000>:
 
 ```sh
-docker run --rm --user "$(id -u):$(id -g)" -e HOME=/tmp/home -v "$PWD":/project -w /project \
-  electronuserland/builder:wine npx electron-builder --win nsis portable --x64
+docker run -d --name portflow-companion --restart unless-stopped -p 127.0.0.1:8000:8000 -v portflow-companion:/data ghcr.io/ldideric/portflow-companion:latest
 ```
 
-With Wine installed, `npm run dist:win` does the same.
+Bijwerken, stoppen, verwijderen, docker compose en wat je doet als het niet werkt: [INSTALL.md](INSTALL.md).
 
-Linux (Fedora, rpm): the same image, `npx electron-builder --linux rpm` instead. `npm run dist:linux` works too where the bundled packaging tool runs (on Fedora it needs `libxcrypt-compat`). Install with `sudo dnf install ./dist/companion-login-<version>.x86_64.rpm`; the package's desktop entry registers the `portflow-companion://` link.
+## Companion Login
 
-## Installing on Windows
+Inloggen gaat nu met je Canvas-cookies, en die verlopen meestal na ongeveer een dag. Companion Login is een klein programma dat Canvas in een eigen venster opent en je sessie aan Companion op je computer geeft, zodat opnieuw inloggen één klik is. Het is nog niet als download beschikbaar. De code staat in [`login/`](login/), zodat iedereen kan nagaan wat het met je login doet: je sessie gaat alleen naar Companion op je eigen computer.
 
-1. Run `Companion-Login-Setup-<version>.exe`. The app isn't signed, so Windows SmartScreen says "Windows protected your PC". Click "More info", then "Run anyway". This happens once per downloaded file.
-2. The installer finishes on its own and starts Companion Login. With Companion running on port 8000, it opens the Canvas login, or closes by itself when Canvas still knows you.
-3. Later, start it from the Start menu, or from a `portflow-companion://login?port=8000` link (it asks before it logs in).
+## Nieuwe versies
 
-Uninstall it from Settings, Apps. That leaves the login in `%APPDATA%\Companion Login`; delete that folder too to log out.
+Wat er per versie veranderd is staat bij [Releases](../../releases). Companion zegt het zelf als er een nieuwe versie is, en laat na het bijwerken zien wat er nieuw is.
+
+De code van Companion zelf is niet openbaar. Problemen en ideeën meld je in de app via **Idee of probleem**.
