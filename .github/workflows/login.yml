@@ -11,10 +11,10 @@ permissions:
   contents: write
 
 jobs:
-  build:
+  linux:
     runs-on: ubuntu-latest
-    # Builds the rpm without libxcrypt-compat and the Windows installer with Wine.
-    container: electronuserland/builder:wine
+    # Builds the rpm without libxcrypt-compat on the runner.
+    container: electronuserland/builder
     defaults:
       run:
         working-directory: login
@@ -32,25 +32,43 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npx electron-builder --publish never --linux rpm deb AppImage --x64
-      - run: npx electron-builder --publish never --win nsis portable --x64
-        env:
-          HOME: /tmp/home # Wine refuses the container's home, which belongs to another user
 
       - uses: actions/upload-artifact@v7
         with:
-          name: login
+          name: linux
           if-no-files-found: error
           path: |
-            login/dist/*.exe
-            login/dist/*.blockmap
             login/dist/*.AppImage
             login/dist/*.rpm
             login/dist/*.deb
-            login/dist/latest*.yml
-            !login/dist/*__uninstaller*
+            login/dist/latest-linux.yml
+
+  # The NSIS installer runs its own build step under Wine on Linux, and Wine doesn't run in a CI container.
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: login
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: npm ci
+      - run: npx electron-builder --publish never --win nsis portable --x64
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          if-no-files-found: error
+          path: |
+            login/dist/Companion-Login-Setup.exe
+            login/dist/Companion-Login-Setup.exe.blockmap
+            login/dist/Companion-Login-portable.exe
+            login/dist/latest.yml
 
   release:
-    needs: build
+    needs: [linux, windows]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -58,8 +76,8 @@ jobs:
           fetch-depth: 0
       - uses: actions/download-artifact@v8
         with:
-          name: login
           path: files
+          merge-multiple: true
 
       - name: Release
         env:
