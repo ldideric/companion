@@ -12,7 +12,7 @@ Normaal draait Companion op je laptop. Je kunt het ook op een server zetten die 
 
 Wat we hebben gemerkt:
 
-- Canvas vernieuwt je sessie elke keer dat Companion inlogt. Zolang Companion blijft draaien en ophalen, blijft je sessie dus in leven. We hebben dat meer dan een week getest met één keer inloggen per 6 uur.
+- Canvas vernieuwt je sessie elke keer dat Companion inlogt. Zolang Companion blijft draaien en ophalen, blijft je sessie dus in leven. We hebben dat bijna een week getest met één keer inloggen per 6 uur, en de sessie leefde nog.
 - Staat Companion ongeveer een dag uit, dan is de sessie verlopen en moet je opnieuw inloggen.
 
 Op een laptop die 's nachts dicht gaat verloopt je sessie dus vaak. Op een server die aan blijft bijna nooit.
