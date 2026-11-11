@@ -71,7 +71,7 @@ Companion Login (het programmaatje voor inloggen met één klik) werkt alleen me
 
 Companion kan meldingen sturen via [ntfy](https://ntfy.sh): een gratis app voor Android en iOS, en een website.
 
-1. Bedenk een onderwerp (topic) dat niemand kan raden, bijvoorbeeld met `echo companion-$(openssl rand -hex 12)`. Een topic op `ntfy.sh` kan iedereen lezen die de naam kent. Een naam als `companion-jan` is dus niet veilig. Heb je een eigen ntfy-server, dan kun je die ook gebruiken.
+1. Bedenk een onderwerp (topic) dat niemand kan raden, bijvoorbeeld met `echo companion-$(openssl rand -hex 12)`. Een topic op `ntfy.sh` kan iedereen lezen die de naam kent. Een naam als `companion-jan` is dus niet veilig. Heb je een eigen ntfy-server, dan kun je die ook gebruiken. Vraagt die om een token, zet het dan in `PORTFLOW_NOTIFY_TOKEN_FILE`, net als het adres.
 2. Zet het adres in `notify-url.txt` naast `compose.yaml`, op één regel, zoals `https://ntfy.sh/companion-3f9a...`. Het bestand moet leesbaar zijn voor gebruiker 1000.
 3. Abonneer je in de ntfy-app op hetzelfde topic.
 4. Zet `PORTFLOW_PUBLIC_URL` op het adres van Companion. Dan opent een tik op een melding Companion. Zonder dit adres krijg je de meldingen ook, maar zonder link.
