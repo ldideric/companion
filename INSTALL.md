@@ -54,6 +54,10 @@ docker compose up -d
 
 Je gegevens staan dan in de mappen `cache` en `.secrets` naast het bestand. Bijwerken: `docker compose pull` en daarna `docker compose up -d`.
 
+## Op een server
+
+Wil je dat Companion ook ophaalt en je meldingen stuurt als je laptop dicht is? Zet het op een server die altijd aan staat: [SERVER.md](SERVER.md).
+
 ## Werkt het niet?
 
 - **"port is already allocated"**: iets anders gebruikt poort 8000. Maak in het commando van `127.0.0.1:8000:8000` dan `127.0.0.1:8080:8000` en ga naar <http://localhost:8080>. Gebruik dat ook bij bijwerken.

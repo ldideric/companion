@@ -1,0 +1,48 @@
+# Portflow Companion on a server. The steps (in Dutch) are in SERVER.md.
+#
+# Put this file as compose.yaml in an empty folder on the server, then run there:
+#   mkdir -p cache .secrets
+#   docker compose up -d
+#
+# Update: docker compose pull, then docker compose up -d. Your data stays in cache/ and .secrets/.
+#
+# The app holds your Canvas session. Never publish its port on the internet: either keep it on 127.0.0.1 with
+# Tailscale in front (option 1, below as is), or put a reverse proxy with a login in front (option 2).
+name: portflow-companion
+
+services:
+  portflow-companion:
+    image: ghcr.io/ldideric/portflow-companion:latest
+    restart: unless-stopped
+    volumes:
+      - ./cache:/data/cache:z      # your portfolio, plan and drafts
+      - ./.secrets:/data/secrets:z  # your Canvas cookies
+    environment:
+      # Option 1, Tailscale: the name `tailscale serve` gives this server (see SERVER.md).
+      PORTFLOW_ALLOWED_HOSTS: "jouw-server.jouw-tailnet.ts.net"
+      # Where notifications go and where they link to. Remove these two lines to switch notifications off.
+      PORTFLOW_NOTIFY_URL_FILE: /run/secrets/notify_url
+      PORTFLOW_PUBLIC_URL: "https://jouw-server.jouw-tailnet.ts.net"
+      # Option 2, reverse proxy: your proxy's address in the two lines above, and only requests that carry
+      # the proxy's secret get through.
+      # PORTFLOW_PROXY_SECRET_FILE: /run/secrets/proxy_secret
+    secrets:
+      - notify_url
+      # - proxy_secret
+    # Option 1: only this server itself reaches the app; `tailscale serve` passes it on to your own devices.
+    ports:
+      - "127.0.0.1:8000:8000"
+    # Option 2: no ports at all; the proxy reaches the app over a shared Docker network.
+    # networks:
+    #   - proxy
+
+secrets:
+  notify_url:
+    file: ./notify-url.txt    # one line: your ntfy address, such as https://ntfy.sh/<random topic>
+  # proxy_secret:
+  #   file: ./proxy-secret.txt  # one line: a long random value that your proxy also sends as X-Proxy-Secret
+
+# Option 2: the Docker network your reverse proxy is on.
+# networks:
+#   proxy:
+#     external: true
