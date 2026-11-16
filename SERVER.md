@@ -83,6 +83,7 @@ Companion stuurt een melding als:
 - een coach een evaluatie op een nieuw niveau heeft beoordeeld;
 - een evaluatie is teruggestuurd;
 - er nieuwe feedback op je bewijs is;
+- een klasgenoot je om feedback vraagt;
 - het maandag is: dan krijg je de taken van deze week.
 
 Geen meldingen? Haal dan in `compose.yaml` de regels met `PORTFLOW_NOTIFY_URL_FILE` en `notify_url` weg (bij `environment`, `secrets` en onderaan).
