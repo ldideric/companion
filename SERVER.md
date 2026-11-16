@@ -86,6 +86,8 @@ Companion stuurt een melding als:
 - een klasgenoot je om feedback vraagt;
 - het maandag is: dan krijg je de taken van deze week.
 
+Wil je niet alles? Onder **Meldingen** in **Instellingen** kies je met **Meldingen kiezen** welke je krijgt.
+
 Geen meldingen? Haal dan in `compose.yaml` de regels met `PORTFLOW_NOTIFY_URL_FILE` en `notify_url` weg (bij `environment`, `secrets` en onderaan).
 
 ## Verhuizen van je laptop
