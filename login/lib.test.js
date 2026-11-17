@@ -1,6 +1,6 @@
 const test = require('node:test')
 const assert = require('node:assert')
-const { parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion, updatesItself } = require('./lib')
+const { parseArgs, findCompanion, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion, updatesItself } = require('./lib')
 
 test('isCompanion only accepts the answer Companion gives on /api/version', () => {
   assert.strictEqual(isCompanion({ current: '0.7.0', latest: null, check: true, reachable: true, update: false, feedback: true, demo: null }), true)
@@ -9,18 +9,18 @@ test('isCompanion only accepts the answer Companion gives on /api/version', () =
   assert.strictEqual(isCompanion('<html>'), false)
 })
 
-test('parseArgs defaults to port 8000, started by the student', () => {
-  assert.deepStrictEqual(parseArgs(['/usr/bin/electron', '.']), { port: 8000, fromLink: false })
+test('parseArgs tries 8000 and then 8080 when started by the student', () => {
+  assert.deepStrictEqual(parseArgs(['/usr/bin/electron', '.']), { ports: [8000, 8080], fromLink: false })
 })
 
 test('parseArgs reads the port from a link and remembers the link started it', () => {
-  assert.deepStrictEqual(parseArgs(['app', 'portflow-companion://login?port=8080']), { port: 8080, fromLink: true })
+  assert.deepStrictEqual(parseArgs(['app', 'portflow-companion://login?port=8080']), { ports: [8080], fromLink: true })
 })
 
 test('parseArgs reads --port and ignores ports that make no sense', () => {
-  assert.strictEqual(parseArgs(['app', '--port=8081']).port, 8081)
-  assert.strictEqual(parseArgs(['app', '--port=99999']).port, 8000)
-  assert.strictEqual(parseArgs(['app', 'portflow-companion://login?port=evil.example']).port, 8000)
+  assert.deepStrictEqual(parseArgs(['app', '--port=8081']).ports, [8081])
+  assert.deepStrictEqual(parseArgs(['app', '--port=99999']).ports, [8000, 8080])
+  assert.deepStrictEqual(parseArgs(['app', 'portflow-companion://login?port=evil.example']).ports, [8000, 8080])
 })
 
 test('cookieHeader joins cookies the way the backend reads them', () => {
@@ -58,7 +58,7 @@ test('keepDetails gives session cookies an expiry date and leaves the rest alone
 
 test('parseArgs reads a link the way Windows passes it', () => {
   const argv = ['C:\\Users\\s\\AppData\\Local\\Programs\\Companion Login\\Companion Login.exe', '--allow-file-access-from-files', 'portflow-companion://login/?port=8080']
-  assert.deepStrictEqual(parseArgs(argv), { port: 8080, fromLink: true })
+  assert.deepStrictEqual(parseArgs(argv), { ports: [8080], fromLink: true })
 })
 
 test('protocolTarget registers the portable exe, the installed exe, or electron with this folder', () => {
@@ -77,4 +77,16 @@ test('updatesItself: the Windows installer and the AppImage, not the portable ex
   assert.ok(updatesItself({ APPIMAGE: '/home/s/Companion-Login.AppImage' }, 'linux'))
   assert.ok(!updatesItself({}, 'linux'))
   assert.ok(!updatesItself({}, 'darwin'))
+})
+
+test('findCompanion takes the first port where Companion answers', async () => {
+  const on = (map) => async (port) => map[port] ?? 'offline'
+  assert.deepStrictEqual(await findCompanion([8000, 8080], on({ 8080: 'companion' })), { port: 8080 })
+  assert.deepStrictEqual(await findCompanion([8000, 8080], on({ 8000: 'companion', 8080: 'companion' })), { port: 8000 })
+})
+
+test('findCompanion never picks another program, and says what it found', async () => {
+  const on = (map) => async (port) => map[port] ?? 'offline'
+  assert.deepStrictEqual(await findCompanion([8000, 8080], on({ 8000: 'other' })), { error: 'notCompanion', ports: [8000] })
+  assert.deepStrictEqual(await findCompanion([8000, 8080], on({})), { error: 'offline', ports: [8000, 8080] })
 })

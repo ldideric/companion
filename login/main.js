@@ -18,6 +18,7 @@ const STRINGS = {
     title: 'Inloggen bij Canvas voor Companion',
     done: 'Ingelogd als {name}. Companion haalt je portfolio op.',
     offline: 'Companion is niet bereikbaar op poort {port}. Draait de app?',
+    or: 'of',
     notCompanion: 'Op poort {port} draait iets anders dan Companion. Je sessie is niet verstuurd.',
     refused: 'Companion accepteerde de sessie niet: {detail}',
     timeout: 'Het inloggen duurde te lang. Probeer het opnieuw.',
@@ -34,6 +35,7 @@ const STRINGS = {
     title: 'Log in to Canvas for Companion',
     done: 'Logged in as {name}. Companion is fetching your portfolio.',
     offline: 'Companion is not reachable on port {port}. Is the app running?',
+    or: 'or',
     notCompanion: 'Something other than Companion is running on port {port}. Your session was not sent.',
     refused: 'Companion did not accept the session: {detail}',
     timeout: 'Logging in took too long. Try again.',
@@ -72,7 +74,7 @@ if (!app.requestSingleInstanceLock()) {
 async function run() {
   s = app.getLocale().startsWith('nl') ? STRINGS.nl : STRINGS.en
   updater.start(debug)
-  const { port, fromLink } = lib.parseArgs(process.argv)
+  const { ports, fromLink } = lib.parseArgs(process.argv)
 
   // Any web page can open a portflow-companion:// link, so a link never logs in without the student saying so.
   if (fromLink) {
@@ -82,7 +84,7 @@ async function run() {
       defaultId: 0,
       cancelId: 1,
       message: t('confirm'),
-      detail: t('confirmDetail', { port }),
+      detail: t('confirmDetail', { port: portList(ports) }),
     })
     if (response !== 0) return app.quit()
   }
@@ -120,11 +122,11 @@ async function run() {
     if (handing || details.statusCode >= 400 || !lib.reachedPortflow(details.url)) return
     if (details.resourceType !== 'mainFrame' && details.resourceType !== 'subFrame') return
     handing = true
-    debug('reached Portflow, handing over to port', port)
+    debug('reached Portflow, handing over to port', ports.join(' or '))
     clearTimeout(showTimer)
     clearTimeout(loginTimer)
     clearTimeout(giveUp)
-    handOver(ses, port, fromLink).catch((e) => fail(e.message))
+    handOver(ses, ports, fromLink).catch((e) => fail(e.message))
   })
 
   // Electron has no error page of its own: a page that fails to load leaves a blank window. Say what happened.
@@ -150,22 +152,20 @@ async function run() {
   win.loadURL(lib.LAUNCH_URL)
 }
 
-async function handOver(ses, port, fromLink) {
+async function handOver(ses, ports, fromLink) {
   const cookies = await ses.cookies.get({ url: `${lib.CANVAS}/` })
   // Keep the Canvas session for the next run, so it can skip the SURFconext and Microsoft pages.
   const now = Math.floor(Date.now() / 1000)
   for (const details of lib.keepDetails(cookies, now)) await ses.cookies.set(details).catch((e) => debug('could not keep', details.name, e.message))
   await ses.cookies.flushStore()
+  // A link names the port and any page can open one, so first make sure Companion is the one listening: the
+  // session never goes to another program.
+  const found = await lib.findCompanion(ports, probe)
+  if (found.error) return fail(t(found.error, { port: portList(found.ports) }))
+  const port = found.port
   // The main process posts without an Origin header, which Companion's guard allows for local tools.
   const base = `http://127.0.0.1:${port}`
   let res
-  // A link chooses the port, so first make sure Companion is the one listening there.
-  try {
-    const version = await fetch(`${base}/api/version`)
-    if (!lib.isCompanion(await version.json().catch(() => null))) return fail(t('notCompanion', { port }))
-  } catch {
-    return fail(t('offline', { port }))
-  }
   try {
     res = await fetch(`${base}/api/session`, {
       method: 'POST',
@@ -188,6 +188,19 @@ async function handOver(ses, port, fromLink) {
   if (win && !win.isDestroyed()) win.hide()
   if (Notification.isSupported()) new Notification({ title: 'Companion', body: t('done', { name: body.user?.name ?? '' }) }).show()
   setTimeout(quit, 1500)
+}
+
+async function probe(port) {
+  try {
+    const res = await fetch(`http://127.0.0.1:${port}/api/version`)
+    return lib.isCompanion(await res.json().catch(() => null)) ? 'companion' : 'other'
+  } catch {
+    return 'offline'
+  }
+}
+
+function portList(ports) {
+  return ports.join(` ${t('or')} `)
 }
 
 async function fail(message) {

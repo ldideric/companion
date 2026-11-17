@@ -5,10 +5,12 @@ const LAUNCH_URL = `${CANVAS}/accounts/1/external_tools/1134` // same as LAUNCH_
 const PORTFLOW_HOST = 'portfolio.drieam.app'
 const SCHEME = 'portflow-companion'
 const DEFAULT_PORT = 8000
+// Started by hand, the helper doesn't know the port. The guide moves Companion to 8080 when 8000 is taken.
+const DEFAULT_PORTS = [DEFAULT_PORT, 8080]
 
-/** What to do from the command line: the port, and whether a link (not the student) started us. */
+/** What to do from the command line: the ports to try, and whether a link (not the student) started us. */
 function parseArgs(argv) {
-  let port = DEFAULT_PORT
+  let port = null
   let fromLink = false
   for (const arg of argv) {
     if (arg.startsWith(`${SCHEME}:`)) {
@@ -26,7 +28,7 @@ function parseArgs(argv) {
       if (p) port = p
     }
   }
-  return { port, fromLink }
+  return { ports: port ? [port] : DEFAULT_PORTS, fromLink }
 }
 
 function validPort(value) {
@@ -99,6 +101,21 @@ function isCompanion(body) {
   return !!body && typeof body === 'object' && typeof body.current === 'string' && 'check' in body && 'feedback' in body
 }
 
+/**
+ * The first port where Companion answers. probe(port) says 'companion', 'other' (something else listens there) or
+ * 'offline'. Without a match, the error names what was found, so the student knows whether Companion is running.
+ */
+async function findCompanion(ports, probe) {
+  const results = []
+  for (const port of ports) {
+    const result = await probe(port)
+    if (result === 'companion') return { port }
+    results.push([port, result])
+  }
+  const other = results.find(([, r]) => r === 'other')
+  return other ? { error: 'notCompanion', ports: [other[0]] } : { error: 'offline', ports }
+}
+
 // Only the Windows installer and the AppImage update themselves (see updater.js).
 function updatesItself(env = process.env, platform = process.platform) {
   if (platform === 'win32') return !env.PORTABLE_EXECUTABLE_FILE
@@ -106,4 +123,4 @@ function updatesItself(env = process.env, platform = process.platform) {
   return false
 }
 
-module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, parseArgs, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion, updatesItself }
+module.exports = { CANVAS, LAUNCH_URL, SCHEME, DEFAULT_PORT, DEFAULT_PORTS, parseArgs, findCompanion, cookieHeader, keepDetails, reachedPortflow, needsStudent, protocolTarget, isCompanion, updatesItself }
