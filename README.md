@@ -31,7 +31,7 @@ Bijwerken, stoppen, verwijderen, docker compose en wat je doet als het niet werk
 
 ## Companion Login
 
-Inloggen gaat nu met je Canvas-cookies, en die verlopen meestal na ongeveer een dag. Companion Login is een klein programma dat Canvas in een eigen venster opent en je sessie aan Companion op je computer geeft, zodat opnieuw inloggen één klik is. Het is nog niet als download beschikbaar. De code staat in [`login/`](login/), zodat iedereen kan nagaan wat het met je login doet: je sessie gaat alleen naar Companion op je eigen computer.
+Companion logt in met je Canvas-cookies, en die verlopen meestal na ongeveer een dag. Companion Login is een klein programma dat Canvas in een eigen venster opent en je sessie aan Companion op je computer geeft, zodat opnieuw inloggen één klik is. Downloaden en installeren: [INSTALL.md](INSTALL.md#inloggen-met-companion-login). De code staat in [`login/`](login/), zodat iedereen kan nagaan wat het met je login doet: je sessie gaat alleen naar Companion op je eigen computer.
 
 ## Nieuwe versies
 

@@ -18,7 +18,7 @@ docker run -d --name portflow-companion --restart unless-stopped -p 127.0.0.1:80
 
 Ga daarna naar **<http://localhost:8000>** en volg de stappen:
 
-1. Plak je Canvas-cookies. De app legt uit hoe je ze vindt; het kost een halve minuut.
+1. Plak je Canvas-cookies (de app legt uit hoe je ze vindt; het kost een halve minuut), of log in met [Companion Login](#inloggen-met-companion-login).
 2. Wacht tot je portfolio is opgehaald. De eerste keer duurt dat een paar minuten, omdat al je bestanden worden gedownload. Daarna gaat vernieuwen in een paar seconden.
 3. Controleer je semester en maak een planning.
 
@@ -27,6 +27,18 @@ Companion start voortaan vanzelf als Docker draait.
 ## Cookies verlopen
 
 Canvas-cookies verlopen, meestal na ongeveer een dag. Companion vraagt dan om nieuwe, zonder dat je opnieuw begint: je planning, concepten en gegevens blijven staan. In Instellingen zie je wanneer je cookies voor het laatst werkten.
+
+## Inloggen met Companion Login
+
+Cookies kopiëren uit de ontwikkelaarstools hoeft niet. Companion Login is een klein programma dat Canvas in een eigen venster opent en je sessie aan Companion op deze computer geeft. Het werkt alleen met Companion op je eigen computer, niet op een server.
+
+- **Windows**: download [Companion-Login-Setup.exe](https://github.com/ldideric/companion/releases/download/login-latest/Companion-Login-Setup.exe) en open het. Het programma is niet ondertekend, dus Windows zegt "Windows heeft uw pc beschermd". Klik op **Meer informatie** en daarna op **Toch uitvoeren**. Nieuwe versies installeert het daarna zelf.
+- **Linux**: kies op de [downloadpagina](https://github.com/ldideric/companion/releases/tag/login-latest) het `.deb`-bestand (Ubuntu, Debian), het `.rpm`-bestand (Fedora) of het AppImage. Het AppImage werkt zichzelf bij; een `.deb` of `.rpm` werk je bij door hem opnieuw te downloaden.
+- **macOS**: nog niet beschikbaar. Plak daar je cookies.
+
+Open Companion Login als je cookies verlopen zijn. De eerste keer log je in zoals je gewend bent. Daarna onthoudt het venster je login meestal, en is het in een paar seconden klaar. Companion laat dan zelf een knop **Inloggen met Companion Login** zien.
+
+De code staat in [`login/`](login/), zodat iedereen kan nagaan wat het met je login doet.
 
 ## Bijwerken
 
