@@ -2,6 +2,8 @@
 
 A small desktop app that logs in to Canvas in its own window and hands the session to Portflow Companion on this computer, so nobody has to copy cookies from the developer tools.
 
+A student project, not affiliated with, endorsed by or connected to Hogeschool Utrecht, Instructure (Canvas) or Drieam (Portflow).
+
 1. It opens the Canvas launch of Portflow in a window that keeps its own login between runs.
 2. If Canvas still knows you, the launch reaches Portflow and the window never shows. Otherwise it shows the login (SURFconext, then Microsoft) and you log in as usual.
 3. Once Portflow is reached, it posts the Canvas cookies to `http://127.0.0.1:<port>/api/session`, starts a fetch and closes.

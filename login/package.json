@@ -12,6 +12,7 @@
     "dist:linux": "electron-builder --linux rpm deb AppImage"
   },
   "author": "Lietze Diderich",
+  "license": "Apache-2.0",
   "devDependencies": {
     "electron": "^45.2.2",
     "electron-builder": "^26.18.0"
@@ -74,7 +75,7 @@
       "artifactName": "Companion-Login-${arch}.AppImage"
     }
   },
-  "homepage": "https://github.com/ldideric/portflow-companion",
+  "homepage": "https://github.com/ldideric/companion",
   "desktopName": "companion-login.desktop",
   "dependencies": {
     "electron-updater": "^6.8.11"

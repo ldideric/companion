@@ -38,3 +38,7 @@ Inloggen gaat nu met je Canvas-cookies, en die verlopen meestal na ongeveer een 
 Wat er per versie veranderd is staat bij [Releases](../../releases). Companion zegt het zelf als er een nieuwe versie is, en laat na het bijwerken zien wat er nieuw is.
 
 De code van Companion zelf is niet openbaar. Problemen en ideeën meld je in de app via **Idee of probleem**.
+
+## Licentie en beveiliging
+
+De code in deze repository valt onder de [Apache-2.0-licentie](LICENSE). Een beveiligingsprobleem meld je zoals in [SECURITY.md](SECURITY.md) staat, niet in een openbare issue.

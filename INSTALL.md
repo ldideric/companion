@@ -2,6 +2,8 @@
 
 Companion draait in Docker op je eigen computer. Wat het is en wat je ermee kunt staat in de [README](README.md).
 
+Companion is een project van een student. Het is niet verbonden aan, goedgekeurd door of gelieerd met Hogeschool Utrecht of Drieam.
+
 ## Wat je nodig hebt
 
 [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Windows, macOS) of Docker (Linux). Start het één keer, zodat het draait.
