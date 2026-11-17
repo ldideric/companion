@@ -4,7 +4,7 @@ Companion en Companion Login werken met je Canvas-sessie. Een lek daarin kan iem
 
 ## Een probleem melden
 
-Gebruik **Report a vulnerability** onder het tabblad [Security](../../security/advisories/new) van deze repository. Alleen de maker ziet je melding. Zet erin wat je zag, hoe je het kunt nadoen en welke versie je gebruikt (te zien in Instellingen, en voor Companion Login in `login/package.json`).
+Gebruik **Report a vulnerability** onder het tabblad [Security](https://github.com/ldideric/companion/security) van deze repository. Alleen de maker ziet je melding. Zet erin wat je zag, hoe je het kunt nadoen en welke versie je gebruikt (te zien in Instellingen, en voor Companion Login in `login/package.json`).
 
 Je krijgt binnen een week antwoord. Een oplossing komt in een nieuwe versie, en in de release notes staat dat er een beveiligingsprobleem is opgelost. Wil je genoemd worden, zeg dat dan in je melding.
 
