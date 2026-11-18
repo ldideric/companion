@@ -90,6 +90,15 @@ Wil je niet alles? Onder **Meldingen** in **Instellingen** kies je met **Melding
 
 Geen meldingen? Haal dan in `compose.yaml` de regels met `PORTFLOW_NOTIFY_URL_FILE` en `notify_url` weg (bij `environment`, `secrets` en onderaan).
 
+## Op je telefoon
+
+Vanaf versie 0.9.2 kun je Companion op het beginscherm van je telefoon zetten. Het opent dan als een eigen app, zonder adresbalk.
+
+- iPhone: open het adres van Companion in Safari, tik op de deelknop en kies **Zet op beginscherm**.
+- Android: open het adres in Chrome, tik op de drie puntjes en kies **App installeren** of **Toevoegen aan startscherm**.
+
+Dit werkt alleen via een adres met `https://`, dus met Tailscale of je proxy van hierboven. Gebruik je Tailscale, dan moet Tailscale ook op je telefoon aan staan.
+
 ## Verhuizen van je laptop
 
 Je planning, concepten en instellingen neem je mee met een back-up:
