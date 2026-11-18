@@ -77,4 +77,4 @@ Wil je dat Companion ook ophaalt en je meldingen stuurt als je laptop dicht is? 
 - **"port is already allocated"**: iets anders gebruikt poort 8000. Maak in het commando van `127.0.0.1:8000:8000` dan `127.0.0.1:8080:8000` en ga naar <http://localhost:8080>. Gebruik dat ook bij bijwerken.
 - **De pagina laadt niet**: draait Docker? Kijk met `docker ps` of `portflow-companion` erbij staat.
 - **"Iets op deze computer onderschept beveiligde verbindingen"**: een virusscanner, adblocker of proxy controleert je HTTPS-verkeer, en Docker stuurt Companion daar ook doorheen. Zet in Docker Desktop bij Settings, Resources, Proxies de handmatige instelling aan en laat de velden leeg. Of zet `canvas.hu.nl`, `canvaslms.com`, `drieam.app` en `amazonaws.com` in dat programma bij de uitzonderingen.
-- **Iets anders**: meld het via **Idee of probleem** links onderin de app.
+- **Iets anders**: meld het via <https://companion.lietze.nl/melden>. Draait Companion wel, dan kan het ook via **Idee of probleem** links onderin de app.
