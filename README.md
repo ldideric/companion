@@ -6,11 +6,17 @@ Companion is een project van een student. Het is niet verbonden aan, goedgekeurd
 
 *[English below.](#in-english)*
 
+De schermafbeeldingen tonen een nepportfolio uit de demomodus.
+
 ## Wat je ermee kunt
 
 Je ziet per vaardigheid welk niveau je coach gaf, hoeveel evaluaties je nog moet doen en hoeveel weken je daarvoor hebt. Taken zeggen wat er nu moet gebeuren, en wijzen altijd naar iets concreets: een evaluatie die te laat is, bewijs zonder feedback, een klasgenoot die op je feedback wacht.
 
+![Het overzicht: hoeveel weken en evaluaties je nog hebt, en wat je nu moet doen](screenshots/overzicht.png)
+
 Je plant welke evaluatie je in welke week schrijft, en maakt daar elke week een afbeelding van voor PL. Tijdens het schrijven staan de LEF-criteria, de vorige opmerking van je coach en de feedback op je bewijs ernaast. Voor een mondelinge evaluatie zet je je bewijs op volgorde en presenteer je vanuit Companion.
+
+![De planning: welke evaluatie in welke week, en wat er al is ingediend](screenshots/planning.png)
 
 Op een [server](SERVER.md) haalt Companion ook op als je laptop dicht is, en krijg je meldingen op je telefoon.
 
